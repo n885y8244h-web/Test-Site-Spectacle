@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Spectacle avec Claude</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 100%);
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fond animé comme index.html */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            background: rgba(45, 27, 78, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.3));
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #a0a0a0;
+        }
+
+        .info-box {
+            background: rgba(0, 136, 255, 0.1);
+            border-left: 4px solid #0088ff;
+            padding: 20px;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00ffff;
+        }
+
+        .info-box p {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+
+        .info-box strong {
+            color: #00ffff;
+        }
+
+        .steps-box {
+            background: rgba(255, 136, 0, 0.1);
+            border-left: 4px solid #ff8800;
+            padding: 20px;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .steps-box h3 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ff8800;
+        }
+
+        .steps-box ol {
+            margin: 15px 0 0 25px;
+            line-height: 2;
+            color: #cccccc;
+        }
+
+        .steps-box li {
+            margin: 8px 0;
+        }
+
+        .steps-box strong {
+            color: #e65100;
+        }
+
+        .alert {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 0;
+            color: #155724;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .profiles-container {
+            background: rgba(45, 27, 78, 0.8);
+            margin-top: -1px;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            border-top: none;
+        }
+
+        .profile-card {
+            border: 2px solid;
+            border-radius: 15px;
+            margin: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.15);
+            background: rgba(50, 35, 70, 0.95);
+        }
+
+        /* Couleurs alternées - palette cyan/violet subtile */
+        .profile-card.color-0 { border-color: #00ffff; }
+        .profile-card.color-1 { border-color: #0088ff; }
+        .profile-card.color-2 { border-color: #8800ff; }
+        .profile-card.color-3 { border-color: #ff00ff; }
+        .profile-card.color-4 { border-color: #00cccc; }
+
+        .profile-card.completed {
+            opacity: 0.95;
+        }
+
+        .profile-card.completed.color-0,
+        .profile-card.completed.color-1,
+        .profile-card.completed.color-2,
+        .profile-card.completed.color-3,
+        .profile-card.completed.color-4 { 
+            border-color: #00ff88;
+        }
+
+        .profile-header {
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-card.color-0 .profile-header { background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); }
+        .profile-card.color-1 .profile-header { background: linear-gradient(135deg, #0088ff 0%, #0044ff 100%); }
+        .profile-card.color-2 .profile-header { background: linear-gradient(135deg, #8800ff 0%, #ff00ff 100%); }
+        .profile-card.color-3 .profile-header { background: linear-gradient(135deg, #ff00ff 0%, #ff0088 100%); }
+        .profile-card.color-4 .profile-header { background: linear-gradient(135deg, #00cccc 0%, #00ffff 100%); }
+
+        .profile-card.completed .profile-header {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+        }
+
+        .profile-header h3 {
+            font-size: 1.3em;
+        }
+
+        .profile-status {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #00ffff;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #00ffff;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .optional {
+            color: #95a5a6;
+            font-weight: normal;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+            background: rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder,
+        textarea::placeholder {
+            color: #666;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .placeholder-hint {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            margin: 15px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: start;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: #00ffff;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            color: #ffffff;
+        }
+
+        .consent-box {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .consent-box h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .consent-box p {
+            color: #ffffff;
+        }
+
+        .consent-box ul {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .consent-box ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .consent-box ul li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #0088ff 0%, #8800ff 100%);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #0099ff 0%, #9900ff 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-add {
+            background: #27ae60;
+            color: white;
+            margin: 20px;
+            width: calc(100% - 40px);
+            padding: 15px;
+            font-size: 1.1em;
+        }
+
+        .btn-add:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            margin: 20px;
+            width: calc(100% - 40px);
+            padding: 18px;
+            font-size: 1.2em;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-download {
+            background: #7f8c8d;
+            color: white;
+            margin: 0 20px 20px 20px;
+            width: calc(100% - 40px);
+            padding: 12px;
+            font-size: 0.95em;
+        }
+
+        .btn-download:hover {
+            background: #6c7a89;
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+            margin: 0 20px 20px 20px;
+            width: calc(100% - 40px);
+            padding: 12px;
+            font-size: 0.95em;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+        }
+
+        .profile-summary {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 15px 20px;
+            border-radius: 8px;
+        }
+
+        .profile-summary strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .completed-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+
+        .final-actions {
+            background: white;
+            border-radius: 0 0 20px 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stats-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stats-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .email-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 20px 20px 20px;
+            color: #856404;
+            text-align: center;
+        }
+
+        .email-info strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            color: #ff00ff;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Retour à l'accueil</a>
+        
+        <div class="header">
+            <h1>🎭 Spectacle Interactif, Immersif, avec Claude</h1>
+            <p style="font-size: 1.3em; font-weight: 600; color: #667eea; margin: 10px 0;">L'IA qui vous connaît déjà</p>
+            <p>Préparons ensemble une expérience magique !</p>
+        </div>
+
+        <div class="info-box">
+            <h3>👉 Comment ça marche ?</h3>
+            <p><strong>Pour vous :</strong> Remplissez votre profil avec quelques infos amusantes.</p>
+            <p><strong>Pour vos invités :</strong> Vous pouvez ajouter leurs profils en surprise ! Imaginez leur tête quand Claude les connaîtra déjà... 😱</p>
+            <p><strong>Confidentialité :</strong> Ces infos sont uniquement pour le spectacle et ne seront jamais partagées.</p>
+        </div>
+
+        <div class="steps-box">
+            <h3>⚠️ IMPORTANT - Marche à suivre :</h3>
+            <ol>
+                <li>Remplissez un profil et cliquez sur <strong>"✅ Enregistrer CE profil"</strong></li>
+                <li>Répétez pour chaque spectateur (cliquez sur <strong>"➕ Ajouter un spectateur"</strong>)</li>
+                <li>À la fin, cliquez sur <strong>"📥 Télécharger TOUS les profils"</strong></li>
+                <li>Envoyez le fichier téléchargé par email à : <strong style="color: #667eea;">claudeshow2025@gmail.com</strong></li>
+            </ol>
+        </div>
+
+        <div class="alert" id="successAlert">
+            <strong>✅ Profils enregistrés avec succès !</strong>
+            Merci, on a hâte de vous voir au spectacle ! 🎉
+        </div>
+
+        <div class="profiles-container" id="profilesContainer">
+            <!-- Les profils seront ajoutés ici -->
+        </div>
+
+        <div class="final-actions">
+            <div class="stats">
+                <div class="stats-number" id="profileCount">0</div>
+                <div class="stats-label">personne(s) prête(s)</div>
+            </div>
+
+            <button type="button" class="btn-add" onclick="addNewProfile()">
+                ➕ Ajouter un autre spectateur
+            </button>
+
+            <button type="button" class="btn-send" id="sendBtn" onclick="sendProfiles()" style="display:none;">
+                📧 Envoyer les profils à Manu
+            </button>
+
+            <div class="email-info" id="emailInfo" style="display:none;">
+                <strong>📧 Dernière étape !</strong>
+                Le fichier JSON va se télécharger. Envoyez-le par email à :<br>
+                <strong style="color: #667eea; font-size: 1.1em; margin-top: 5px; display: inline-block;">manuelpouilloux@gmail.com</strong>
+            </div>
+
+            <button type="button" class="btn-download" id="downloadBtn" onclick="downloadJSON()">
+                📥 Télécharger JSON (backup)
+            </button>
+
+            <button type="button" class="btn-reset" onclick="resetAll()">
+                🗑️ Tout réinitialiser et recommencer à zéro
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let profiles = [];
+        let currentProfileNumber = 1;
+        let editingProfileIndex = -1;
+        const colors = ['color-0', 'color-1', 'color-2', 'color-3', 'color-4'];
+
+        // Charger les profils sauvegardés
+        window.onload = function() {
+            const saved = localStorage.getItem('spectateurs');
+            if (saved) {
+                profiles = JSON.parse(saved);
+                currentProfileNumber = profiles.length + 1;
+                profiles.forEach((profile, index) => {
+                    displayCompletedProfile(profile, index);
+                });
+                updateStats();
+                if (profiles.length > 0) {
+                    document.getElementById('successAlert').classList.add('show');
+                }
+            }
+            // Ajouter le premier formulaire
+            addNewProfile();
+        };
+
+        function toggleQuiRempli(profileNumber) {
+            const estCompliceNon = document.getElementById(`complice-non-${profileNumber}`).checked;
+            const quiRempliGroup = document.getElementById(`qui-rempli-group-${profileNumber}`);
+            const quiRempliInput = document.getElementById(`qui-rempli-${profileNumber}`);
+            
+            if (estCompliceNon) {
+                quiRempliGroup.style.display = 'block';
+                quiRempliInput.required = true;
+            } else {
+                quiRempliGroup.style.display = 'none';
+                quiRempliInput.required = false;
+                quiRempliInput.value = ''; // Reset value
+            }
+        }
+
+        function addNewProfile() {
+            const profileNumber = currentProfileNumber;
+            const colorClass = colors[(profileNumber - 1) % colors.length];
+            
+            const profileCard = document.createElement('div');
+            profileCard.className = `profile-card ${colorClass}`;
+            profileCard.id = `profile-${profileNumber}`;
+            
+            profileCard.innerHTML = getFormHTML(profileNumber, colorClass);
+
+            document.getElementById('profilesContainer').appendChild(profileCard);
+            
+            // Initialiser le toggle "qui a rempli"
+            setTimeout(() => {
+                toggleQuiRempli(profileNumber);
+            }, 50);
+            
+            // Scroll vers le nouveau formulaire
+            setTimeout(() => {
+                profileCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function getFormHTML(profileNumber, colorClass, existingData = null) {
+            const data = existingData || {};
+            
+            return `
+                <div class="profile-header">
+                    <h3>👤 Spectateur ${profileNumber}</h3>
+                    <span class="profile-status">En cours...</span>
+                </div>
+                <div class="form-content">
+                    <form id="form-${profileNumber}" onsubmit="submitProfile(event, ${profileNumber})">
+                        
+                        <!-- SECTION 1 : IDENTITÉ -->
+                        <div class="section">
+                            <h2 class="section-title">📝 Qui êtes-vous ?</h2>
+
+                            <div class="form-group">
+                                <label>Prénom <span class="required">*</span></label>
+                                <input type="text" name="prenom" required placeholder="Votre prénom" value="${data.prenom || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Genre</label>
+                                <div class="radio-group">
+                                    <div class="radio-item">
+                                        <input type="radio" name="genre" id="homme-${profileNumber}" value="Homme" ${!data.genre || data.genre === 'Homme' ? 'checked' : ''}>
+                                        <label for="homme-${profileNumber}">Homme</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" name="genre" id="femme-${profileNumber}" value="Femme" ${data.genre === 'Femme' ? 'checked' : ''}>
+                                        <label for="femme-${profileNumber}">Femme</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" name="genre" id="autre-${profileNumber}" value="Autre" ${data.genre === 'Autre' ? 'checked' : ''}>
+                                        <label for="autre-${profileNumber}">Autre/Ne se prononce pas</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Surnom / Pseudo <span class="required">*</span></label>
+                                <input type="text" name="pseudo" required placeholder="Comment voulez-vous que Claude vous appelle ?" value="${data.pseudo || ''}">
+                                <div class="placeholder-hint">
+                                    <strong>💡 Important :</strong> Choisissez un pseudo UNIQUE pour éviter les confusions !<br>
+                                    Si plusieurs personnes ont le même prénom, ajoutez quelque chose d'unique :<br>
+                                    Ex: "Paul le Roux", "Sarah Paris", "Hervé le Barbu", "Marie de Lyon", etc.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Âge <span class="optional">(optionnel)</span></label>
+                                <input type="number" name="age" min="1" max="120" placeholder="Votre âge" value="${data.age || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Métier / Passion principale <span class="required">*</span></label>
+                                <input type="text" name="metier" required placeholder="Qu'est-ce que vous faites ?" value="${data.metier || ''}">
+                            </div>
+                        </div>
+
+                        <!-- SECTION COMPLICE OU SURPRISE -->
+                        <div class="section" style="background: rgba(255, 0, 255, 0.1); border: 2px solid rgba(255, 0, 255, 0.3);">
+                            <h2 class="section-title">🎭 Cette personne est-elle complice ?</h2>
+                            <p class="section-subtitle">Dites-nous si cette personne sait qu'elle participe !</p>
+
+                            <div class="form-group">
+                                <div class="radio-group" style="flex-direction: column; gap: 15px;">
+                                    <div class="radio-item" style="background: rgba(0, 255, 136, 0.1); padding: 15px; border-radius: 10px;">
+                                        <input type="radio" name="est_complice" id="complice-oui-${profileNumber}" value="true" ${!data.est_complice || data.est_complice === 'true' || data.est_complice === true ? 'checked' : ''} onchange="toggleQuiRempli(${profileNumber})">
+                                        <label for="complice-oui-${profileNumber}" style="margin: 0;">
+                                            <strong>✅ OUI - Cette personne remplit son propre profil</strong><br>
+                                            <small style="color: #a0a0a0;">Elle sait que Claude aura accès à ses infos pendant le spectacle</small>
+                                        </label>
+                                    </div>
+                                    <div class="radio-item" style="background: rgba(255, 136, 0, 0.1); padding: 15px; border-radius: 10px;">
+                                        <input type="radio" name="est_complice" id="complice-non-${profileNumber}" value="false" ${data.est_complice === 'false' || data.est_complice === false ? 'checked' : ''} onchange="toggleQuiRempli(${profileNumber})">
+                                        <label for="complice-non-${profileNumber}" style="margin: 0;">
+                                            <strong>🎁 NON - Je remplis en secret pour surprendre cette personne !</strong><br>
+                                            <small style="color: #a0a0a0;">Imaginez sa tête quand Claude la connaîtra déjà... 😊</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="qui-rempli-group-${profileNumber}" style="display: none;">
+                                <label>👤 Votre prénom (celui qui remplit ce formulaire) <span class="required">*</span></label>
+                                <input type="text" name="qui_a_rempli" id="qui-rempli-${profileNumber}" placeholder="Votre prénom" value="${data.qui_a_rempli || ''}">
+                                <div class="placeholder-hint">C'est pour que Claude sache qui a préparé la surprise !</div>
+                            </div>
+                        </div>
+
+                        <!-- SECTIONS SUIVANTES (identiques) -->
+                        <div class="section">
+                            <h2 class="section-title">🎨 Vos goûts</h2>
+                            <p class="section-subtitle">Plus vous en dites, plus c'est drôle ! 😊</p>
+
+                            <div class="form-group">
+                                <label>🍕 Plat préféré <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="plat" placeholder="Votre plat préféré" value="${data.plat || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🎬 Film/Série <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="film" placeholder="Un film ou série que vous adorez" value="${data.film || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🎵 Musique/Artiste <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="musique" placeholder="Votre musique ou artiste préféré" value="${data.musique || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🐾 Animal préféré <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="animal" placeholder="Chat, chien, licorne..." value="${data.animal || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🎨 Hobby <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="hobby" placeholder="Votre passion" value="${data.hobby || ''}">
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2 class="section-title">✨ Vos rêves</h2>
+
+                            <div class="form-group">
+                                <label>🌍 Destination de rêve <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="destination" placeholder="Où rêvez-vous d'aller ?" value="${data.destination || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>💼 Métier de rêve <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="metier_reve" placeholder="Si différent de maintenant" value="${data.metier_reve || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🎯 Projet secret <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="projet" placeholder="Un projet en cours" value="${data.projet || ''}">
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2 class="section-title">😱 Vos peurs</h2>
+
+                            <div class="form-group">
+                                <label>😨 Peur/Phobie <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="peur" placeholder="Araignées, hauteur..." value="${data.peur || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>🤢 Ce que vous détestez <span class="optional">(optionnel)</span></label>
+                                <input type="text" name="deteste" placeholder="Ce qui vous énerve" value="${data.deteste || ''}">
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2 class="section-title">📖 Vos anecdotes</h2>
+
+                            <div class="form-group">
+                                <label>🎉 Anecdote marrante <span class="optional">(optionnel)</span></label>
+                                <textarea name="anecdote_marrante" placeholder="Une histoire drôle">${data.anecdote_marrante || ''}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🤦 Moment gênant <span class="optional">(optionnel)</span></label>
+                                <textarea name="moment_genant" placeholder="Un moment embarrassant">${data.moment_genant || ''}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🏃 Truc fou <span class="optional">(optionnel)</span></label>
+                                <textarea name="truc_fou" placeholder="Quelque chose d'audacieux">${data.truc_fou || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2 class="section-title">🎭 Jeu Vrai/Faux</h2>
+                            <p class="section-subtitle">Claude devra deviner avec le public !</p>
+
+                            <div class="form-group">
+                                <label>✅ Info VRAIE <span class="optional">(optionnel)</span></label>
+                                <textarea name="info_vraie" placeholder="Un fait réel et surprenant">${data.info_vraie || ''}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>❌ Info FAUSSE <span class="optional">(optionnel)</span></label>
+                                <textarea name="info_fausse" placeholder="Un mensonge crédible">${data.info_fausse || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="consent-box">
+                            <h3>⚠️ Consentement</h3>
+                            <p>En continuant, vous acceptez que :</p>
+                            <ul>
+                                <li>Vos infos seront utilisées pendant le spectacle</li>
+                                <li>Elles seront partagées avec le public présent</li>
+                                <li>Des images IA pourront être générées</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><strong>🗑️ Suppression garantie après le spectacle</strong></p>
+
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" name="autorisation_images" id="img-${profileNumber}" ${data.autorisation_images ? 'checked' : ''}>
+                                    <label for="img-${profileNumber}">J'autorise les images IA me concernant</label>
+                                </div>
+
+                                <div class="checkbox-item">
+                                    <input type="checkbox" name="autorisation_taquiner" id="taq-${profileNumber}" ${data.autorisation_taquiner ? 'checked' : ''}>
+                                    <label for="taq-${profileNumber}">Claude peut me taquiner gentiment 😊</label>
+                                </div>
+
+                                <div class="checkbox-item">
+                                    <input type="checkbox" name="accepte_conditions" id="cond-${profileNumber}" required>
+                                    <label for="cond-${profileNumber}"><strong>J'accepte ces conditions <span class="required">*</span></strong></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn-secondary" onclick="resetForm(${profileNumber})">🔄 Réinitialiser</button>
+                            <button type="submit" class="btn-primary">⏭️ Suivant (auto-enregistrement)</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function submitProfile(event, profileNumber) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            const data = {
+                prenom: formData.get('prenom'),
+                est_complice: formData.get('est_complice') === 'true',
+                qui_a_rempli: formData.get('est_complice') === 'false' ? formData.get('qui_a_rempli') : formData.get('prenom'),
+                genre: formData.get('genre'),
+                pseudo: formData.get('pseudo') || formData.get('prenom'),
+                age: formData.get('age') || '',
+                metier: formData.get('metier'),
+                plat: formData.get('plat'),
+                film: formData.get('film'),
+                musique: formData.get('musique'),
+                animal: formData.get('animal'),
+                hobby: formData.get('hobby'),
+                destination: formData.get('destination'),
+                metier_reve: formData.get('metier_reve'),
+                projet: formData.get('projet'),
+                peur: formData.get('peur'),
+                deteste: formData.get('deteste'),
+                anecdote_marrante: formData.get('anecdote_marrante'),
+                moment_genant: formData.get('moment_genant'),
+                truc_fou: formData.get('truc_fou'),
+                info_vraie: formData.get('info_vraie'),
+                info_fausse: formData.get('info_fausse'),
+                autorisation_images: formData.get('autorisation_images') === 'on',
+                autorisation_taquiner: formData.get('autorisation_taquiner') === 'on'
+            };
+
+            // Ajouter ou modifier
+            if (editingProfileIndex >= 0) {
+                profiles[editingProfileIndex] = data;
+                editingProfileIndex = -1;
+            } else {
+                profiles.push(data);
+            }
+            
+            localStorage.setItem('spectateurs', JSON.stringify(profiles));
+
+            // Afficher le profil complété
+            const card = document.getElementById(`profile-${profileNumber}`);
+            const colorClass = colors[(profileNumber - 1) % colors.length];
+            card.className = `profile-card completed ${colorClass}`;
+            
+            const genderIcon = data.genre === 'Homme' ? '👨' : data.genre === 'Femme' ? '👩' : '👤';
+            
+            const summary = `
+                <div class="profile-header">
+                    <h3>${genderIcon} ${data.pseudo || data.prenom} <span class="completed-badge">✅ Enregistré</span></h3>
+                </div>
+                <div class="form-content">
+                    <div class="profile-summary">
+                        <strong>${data.pseudo || data.prenom}</strong>
+                        ${data.genre} • ${data.age ? data.age + ' ans • ' : ''}${data.metier}
+                    </div>
+                    <button type="button" class="btn-edit" onclick="editProfile(${profiles.length - 1}, ${profileNumber})">
+                        ✏️ Modifier ce profil
+                    </button>
+                </div>
+            `;
+            
+            card.innerHTML = summary;
+
+            // Incrémenter
+            currentProfileNumber++;
+
+            // Mettre à jour
+            updateStats();
+            document.getElementById('successAlert').classList.add('show');
+
+            // Ajouter automatiquement le formulaire suivant
+            addNewProfile();
+
+            // Scroll en haut
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        function editProfile(index, profileNumber) {
+            editingProfileIndex = index;
+            const data = profiles[index];
+            const card = document.getElementById(`profile-${profileNumber}`);
+            const colorClass = colors[(profileNumber - 1) % colors.length];
+            card.className = `profile-card ${colorClass}`;
+            card.innerHTML = getFormHTML(profileNumber, colorClass, data);
+            
+            // Scroll vers le formulaire
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function displayCompletedProfile(data, index) {
+            const profileNumber = index + 1;
+            const colorClass = colors[(profileNumber - 1) % colors.length];
+            const genderIcon = data.genre === 'Homme' ? '👨' : data.genre === 'Femme' ? '👩' : '👤';
+            
+            const profileCard = document.createElement('div');
+            profileCard.className = `profile-card completed ${colorClass}`;
+            profileCard.id = `profile-${profileNumber}`;
+            profileCard.innerHTML = `
+                <div class="profile-header">
+                    <h3>${genderIcon} ${data.pseudo || data.prenom} <span class="completed-badge">✅ Enregistré</span></h3>
+                </div>
+                <div class="form-content">
+                    <div class="profile-summary">
+                        <strong>${data.pseudo || data.prenom}</strong>
+                        ${data.genre} • ${data.age ? data.age + ' ans • ' : ''}${data.metier}
+                    </div>
+                    <button type="button" class="btn-edit" onclick="editProfile(${index}, ${profileNumber})">
+                        ✏️ Modifier ce profil
+                    </button>
+                </div>
+            `;
+            document.getElementById('profilesContainer').appendChild(profileCard);
+        }
+
+        function updateStats() {
+            document.getElementById('profileCount').textContent = profiles.length;
+            
+            const sendBtn = document.getElementById('sendBtn');
+            if (profiles.length > 0) {
+                sendBtn.style.display = 'block';
+            } else {
+                sendBtn.style.display = 'none';
+            }
+        }
+
+        function resetForm(profileNumber) {
+            if (confirm('Voulez-vous vraiment effacer tous les champs ?')) {
+                document.getElementById(`form-${profileNumber}`).reset();
+            }
+        }
+
+        function sendProfiles() {
+            if (profiles.length === 0) {
+                alert('Aucun profil à envoyer !');
+                return;
+            }
+            
+            // Télécharger le JSON
+            downloadJSON();
+            
+            // Afficher les instructions email
+            document.getElementById('emailInfo').style.display = 'block';
+            
+            // Ouvrir le client email
+            const subject = encodeURIComponent('Profils spectacle Claude');
+            const body = encodeURIComponent(`Bonjour Manu,\n\nVoici les ${profiles.length} profil(s) pour le spectacle.\n\nLe fichier JSON est en pièce jointe.\n\nÀ bientôt ! 🎭`);
+            window.location.href = `mailto:manuelpouilloux@gmail.com?subject=${subject}&body=${body}`;
+        }
+
+        function downloadJSON() {
+            const dataStr = JSON.stringify(profiles, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'spectateurs.json';
+            link.click();
+        }
+
+        function resetAll() {
+            if (confirm('⚠️ ATTENTION !\n\nVoulez-vous vraiment SUPPRIMER TOUS les profils et recommencer à zéro ?\n\nCette action est irréversible !')) {
+                if (confirm('Êtes-vous VRAIMENT sûr(e) ? Tous les profils seront perdus !')) {
+                    // Vider le localStorage
+                    localStorage.clear();
+                    // Recharger la page
+                    location.reload();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

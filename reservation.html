@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation - Spectacle Claude</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 100%);
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            color: #ffffff;
+        }
+
+        /* Fond animé */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(45, 27, 78, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.3));
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #a0a0a0;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: rgba(50, 35, 70, 0.95);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.15);
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .required {
+            color: #ff0088;
+            margin-left: 3px;
+        }
+
+        .optional {
+            color: #888;
+            font-weight: normal;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+            background: rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #666;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #2d1b4e;
+            color: #ffffff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .info-box {
+            background: rgba(0, 136, 255, 0.1);
+            border-left: 4px solid #0088ff;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        .info-box strong {
+            color: #00ffff;
+        }
+
+        .consent-box {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .consent-box h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: start;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: #00ffff;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            color: #ffffff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Profile CTA */
+        .profile-cta {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid rgba(255, 0, 255, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .profile-cta h2 {
+            font-size: 2rem;
+            color: #ff00ff;
+            margin-bottom: 20px;
+        }
+
+        .profile-cta p {
+            color: #cccccc;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .profile-cta .warning {
+            color: #ffaa00;
+            font-weight: 600;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .profile-cta .privacy {
+            color: #00ff88;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .btn-profile-cta {
+            display: inline-block;
+            padding: 20px 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff00ff 0%, #ff0088 100%);
+            color: #ffffff;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+        }
+
+        .btn-profile-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(255, 0, 255, 0.6);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-message h2 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .success-message p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            color: #ff00ff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .form-card {
+                padding: 25px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Retour à l'accueil</a>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>🎫 Réservation</h1>
+            <p>Réservez votre place pour le spectacle</p>
+        </div>
+
+        <!-- Form -->
+        <div class="form-card">
+            <form id="reservationForm">
+                <!-- Section Date -->
+                <div class="section">
+                    <h2 class="section-title">📅 Choisissez votre date</h2>
+                    
+                    <div class="form-group">
+                        <label>Date du spectacle <span class="required">*</span></label>
+                        <select name="date" required>
+                            <option value="">-- Sélectionnez une date --</option>
+                            <option value="test">Spectacle test - Date à confirmer</option>
+                            <option value="2025-12-15">Samedi 15 décembre 2025 - 20h30</option>
+                            <option value="2025-12-22">Samedi 22 décembre 2025 - 20h30</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre de places <span class="required">*</span></label>
+                        <select name="places" required>
+                            <option value="">-- Combien de places ? --</option>
+                            <option value="1">1 place</option>
+                            <option value="2">2 places</option>
+                            <option value="3">3 places</option>
+                            <option value="4">4 places</option>
+                            <option value="5">5 places</option>
+                            <option value="6">6 places</option>
+                            <option value="7">7 places</option>
+                            <option value="8">8 places</option>
+                            <option value="9">9 places</option>
+                            <option value="10">10 places</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section Infos -->
+                <div class="section">
+                    <h2 class="section-title">👤 Vos coordonnées</h2>
+
+                    <div class="form-group">
+                        <label>Prénom <span class="required">*</span></label>
+                        <input type="text" name="prenom" required placeholder="Votre prénom">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nom <span class="required">*</span></label>
+                        <input type="text" name="nom" required placeholder="Votre nom">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" name="email" required placeholder="votre@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Téléphone <span class="optional">(optionnel)</span></label>
+                        <input type="tel" name="telephone" placeholder="06 12 34 56 78">
+                    </div>
+                </div>
+
+                <!-- Section Message -->
+                <div class="section">
+                    <h2 class="section-title">💬 Message</h2>
+
+                    <div class="form-group">
+                        <label>Dites-nous pourquoi vous voulez venir ! <span class="optional">(optionnel)</span></label>
+                        <textarea name="message" placeholder="Votre motivation, vos attentes..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <p><strong>ℹ️ Spectacle test gratuit</strong></p>
+                    <p>Cette réservation est pour un spectacle test. L'entrée est gratuite.</p>
+                    <p>Vous recevrez une confirmation par email avec tous les détails pratiques.</p>
+                </div>
+
+                <!-- Consentement -->
+                <div class="consent-box">
+                    <h3>⚠️ Consentement</h3>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="accepte_conditions" id="conditions" required>
+                        <label for="conditions">
+                            <strong>J'accepte les conditions</strong> : Je comprends que ce spectacle est interactif et que Claude pourra me poser des questions pendant le show. <span class="required">*</span>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="newsletter" id="newsletter">
+                        <label for="newsletter">
+                            Je souhaite recevoir des informations sur les prochains spectacles
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Réinitialiser</button>
+                    <button type="submit" class="btn-primary">✅ Confirmer ma réservation</button>
+                </div>
+            </form>
+
+            <!-- Call to Action Profils -->
+            <div class="profile-cta">
+                <h2>🎭 VIVEZ UNE EXPÉRIENCE UNIQUE !</h2>
+                <p>
+                    N'oubliez pas de remplir votre profil ainsi que celui des personnes qui vous accompagneront 
+                    afin de rendre ce spectacle encore plus magique et personnalisé.
+                </p>
+                <p>
+                    <strong>Et imaginez la surprise des gens si vous êtes le seul à avoir donné des infos ! 😊</strong>
+                </p>
+                <p>
+                    Soyez sympas, drôles et pas vulgaires. Claude aura accès à ces informations pendant le spectacle 
+                    et s'en servira pour communiquer avec le public de manière unique.
+                </p>
+                <p class="warning">
+                    ⚠️ Rien n'est obligatoire, mais plus vous jouerez le jeu, plus ça peut être fun !
+                </p>
+                <p class="privacy">
+                    📝 Toutes les données seront effacées à la fin du spectacle.
+                </p>
+                <a href="formulaire_spectacle_v9_fixed.html" class="btn-profile-cta">📝 REMPLIR LES PROFILS MAINTENANT</a>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <h2>🎉 Réservation enregistrée !</h2>
+                <p><strong>Merci <span id="confirmPrenom"></span> !</strong></p>
+                <p>Votre réservation pour <strong><span id="confirmPlaces"></span> place(s)</strong> a bien été enregistrée.</p>
+                <p>Un fichier de confirmation a été téléchargé.</p>
+                <p>Nous vous recontacterons très bientôt par email (<span id="confirmEmail"></span>) avec tous les détails pratiques.</p>
+                <br>
+                <button class="btn-primary" onclick="location.reload()">Nouvelle réservation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('reservationForm');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            
+            const reservation = {
+                date: formData.get('date'),
+                places: formData.get('places'),
+                prenom: formData.get('prenom'),
+                nom: formData.get('nom'),
+                email: formData.get('email'),
+                telephone: formData.get('telephone') || 'Non renseigné',
+                message: formData.get('message') || 'Aucun message',
+                newsletter: formData.get('newsletter') === 'on',
+                timestamp: new Date().toISOString()
+            };
+
+            // Télécharger le JSON
+            downloadJSON(reservation);
+
+            // Afficher confirmation
+            document.getElementById('confirmPrenom').textContent = reservation.prenom;
+            document.getElementById('confirmPlaces').textContent = reservation.places;
+            document.getElementById('confirmEmail').textContent = reservation.email;
+
+            // Masquer formulaire, afficher succès
+            form.style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
+
+            // Scroll en haut
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Ouvrir email (optionnel)
+            const subject = encodeURIComponent('Nouvelle réservation spectacle Claude');
+            const body = encodeURIComponent(`Nouvelle réservation :\n\nNom : ${reservation.nom} ${reservation.prenom}\nEmail : ${reservation.email}\nDate : ${reservation.date}\nPlaces : ${reservation.places}\n\nLe fichier JSON est en pièce jointe.`);
+            setTimeout(() => {
+                window.location.href = `mailto:manlepirate@gmail.com?subject=${subject}&body=${body}`;
+            }, 1000);
+        });
+
+        function downloadJSON(data) {
+            const filename = `reservation_${data.prenom}_${data.nom}_${Date.now()}.json`;
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+        }
+
+        function resetForm() {
+            if (confirm('Voulez-vous vraiment effacer tous les champs ?')) {
+                form.reset();
+            }
+        }
+    </script>
+</body>
+</html>

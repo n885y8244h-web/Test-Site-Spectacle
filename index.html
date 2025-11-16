@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLAUDE - L'IA qui vous connaît déjà</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animation de fond avec grille */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Particules flottantes */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 10s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { transform: translateY(-100vh) translateX(50px); }
+        }
+
+        /* Container principal */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(6rem, 20vw, 16rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(0, 255, 255, 0.3)); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(0, 255, 255, 0.6)); }
+        }
+
+        .hero .tagline {
+            font-size: clamp(3.6rem, 9vw, 6rem);
+            color: #00ffff;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero .description {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: #a0a0a0;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 50px;
+        }
+
+        /* Boutons */
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(180deg, #4488cc 0%, #8844cc 100%);
+            color: #ffdd00;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(68, 136, 204, 0.6);
+            background: linear-gradient(180deg, #5599dd 0%, #9955dd 100%);
+        }
+
+        .btn-gradient-orange {
+            background: linear-gradient(180deg, #4488cc 0%, #8844cc 100%);
+            color: #ffdd00;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-gradient-orange:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(68, 136, 204, 0.6);
+            background: linear-gradient(180deg, #5599dd 0%, #9955dd 100%);
+        }
+
+        /* Masques flottants */
+        .floating-masks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .mask {
+            position: absolute;
+            font-size: 4rem;
+            opacity: 0.15;
+            animation: floatMask 8s ease-in-out infinite;
+        }
+
+        .mask-1 {
+            left: 5%;
+            top: 20%;
+            animation-delay: 0s;
+        }
+
+        .mask-2 {
+            left: 10%;
+            top: 50%;
+            animation-delay: 2s;
+        }
+
+        .mask-3 {
+            left: 8%;
+            top: 75%;
+            animation-delay: 4s;
+        }
+
+        .mask-4 {
+            right: 5%;
+            top: 25%;
+            animation-delay: 1s;
+        }
+
+        .mask-5 {
+            right: 10%;
+            top: 55%;
+            animation-delay: 3s;
+        }
+
+        .mask-6 {
+            right: 8%;
+            top: 80%;
+            animation-delay: 5s;
+        }
+
+        /* Masques qui descendent */
+        .mask-down-1 {
+            left: 20%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+
+        .mask-down-2 {
+            left: 35%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        .mask-down-3 {
+            left: 50%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .mask-down-4 {
+            right: 50%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 1.5s;
+        }
+
+        .mask-down-5 {
+            right: 35%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+
+        .mask-down-6 {
+            right: 20%;
+            top: 95%;
+            animation: fallDown 3s ease-in-out infinite;
+            animation-delay: 2.5s;
+        }
+
+        @keyframes fallDown {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(150px) rotate(180deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(300px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes floatMask {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+            50% {
+                transform: translateY(-40px) rotate(-5deg);
+            }
+            75% {
+                transform: translateY(-20px) rotate(3deg);
+            }
+        }
+
+        /* Message scroll */
+        .scroll-message {
+            margin-top: 80px;
+            text-align: center;
+            color: #00ffff;
+            font-size: 1.2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .scroll-arrow {
+            font-size: 2.5rem;
+            margin-top: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(20px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Section Concept */
+        .concept {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 255, 0.05) 50%, transparent 100%);
+        }
+
+        .concept h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            margin-bottom: 60px;
+            color: #00ffff;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step {
+            background: linear-gradient(135deg, rgba(68, 136, 204, 0.15) 0%, rgba(136, 68, 204, 0.15) 100%);
+            border: 1px solid rgba(68, 136, 204, 0.4);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            background: linear-gradient(135deg, rgba(68, 136, 204, 0.25) 0%, rgba(136, 68, 204, 0.25) 100%);
+            border-color: rgba(68, 136, 204, 0.7);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(68, 136, 204, 0.4);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            color: #000;
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .step h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .step p {
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        /* Section Infos */
+        .infos {
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .infos h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 40px;
+            color: #00ffff;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto 60px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px 20px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(0, 255, 255, 0.1);
+            color: #666;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: #00ffff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* NAVIGATION MENU */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+            z-index: 1000;
+            transform: translateY(-100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+        }
+
+        nav.visible {
+            transform: translateY(0);
+        }
+
+        nav .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8em;
+            font-weight: 900;
+            text-decoration: none;
+            color: #00ffff;
+            transition: all 0.3s;
+        }
+
+        nav .logo-icon {
+            font-size: 1.3em;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        nav .logo-text {
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav .logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+
+        nav .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.05em;
+            font-weight: 500;
+            padding: 8px 0;
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.3px;
+        }
+
+        nav .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff 0%, #ff00ff 100%);
+            transition: width 0.3s;
+        }
+
+        nav .nav-links a:hover {
+            color: #00ffff;
+        }
+
+        nav .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Bouton Démo spécial */
+        nav .nav-demo {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%);
+            padding: 10px 20px !important;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 0, 255, 0.4);
+            font-weight: 600;
+            color: #ff00ff !important;
+        }
+
+        nav .nav-demo:hover {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.3) 0%, rgba(0, 255, 255, 0.3) 100%);
+            border-color: rgba(255, 0, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.3);
+        }
+
+        nav .nav-demo::after {
+            display: none;
+        }
+
+        /* Bouton CTA Réserver */
+        nav .nav-cta {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            color: #000 !important;
+            border-radius: 30px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        nav .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 255, 255, 0.5);
+        }
+
+        nav .nav-cta::after {
+            display: none;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            nav .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(10, 10, 15, 0.98);
+                flex-direction: column;
+                padding: 20px;
+                gap: 20px;
+                border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            }
+
+            nav .nav-links.mobile-open {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Participation Section */
+        .participation {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255, 0, 255, 0.05) 50%, transparent 100%);
+        }
+
+        .participation h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ff00ff;
+        }
+
+        .participation-box {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 0, 255, 0.3);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .participation-box h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+
+        .participation-box p {
+            color: #cccccc;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .participation-box .warning {
+            color: #ffaa00;
+            font-weight: 600;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .participation-box .privacy {
+            color: #00ff88;
+            font-size: 0.95rem;
+            margin-top: 20px;
+        }
+
+        .participation-box .btn {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            padding: 20px 50px;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        /* Animations simples pour étoiles flottantes */
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0px); opacity: 0.6; }
+            50% { transform: translateY(-20px); opacity: 1; }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.7; }
+            50% { transform: translateY(-15px) translateX(10px); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .participation-box {
+                padding: 30px 20px;
+            }
+
+            .participation-box .btn {
+                font-size: 1.1rem;
+                padding: 15px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="mainNav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🎭</span>
+                <span class="logo-text">CLAUDE</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Accueil</a>
+                <a href="index.html#concept">Le Concept</a>
+                <a href="demo_interactive.html" class="nav-demo">✨ Tester la Démo</a>
+                <a href="#formulaire">Mon Profil</a>
+                <a href="index.html#infos">Infos Pratiques</a>
+                <a href="reservation.html" class="nav-cta">🎫 Réserver</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        </div>
+    </nav>
+
+    <!-- Background animé -->
+    <div class="background"></div>
+    
+    <!-- Particules -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>CLAUDE</h1>
+            <p class="tagline">L'IA qui vous connaît déjà</p>
+            <div style="max-width: 800px; margin: 0 auto 40px;">
+                <p style="color: #ffdd00; font-size: 1.6rem; line-height: 1.8; margin-bottom: 20px; font-weight: 600;">
+                    Un spectacle interactif unique où l'intelligence artificielle dialogue avec le public en temps réel.
+                </p>
+                <p style="color: #ff8800; font-size: 1.3rem; line-height: 1.8; margin-bottom: 15px; font-weight: 500;">
+                    Humour, secrets, émotions... Tout est révélé avec bienveillance !
+                </p>
+                <p style="color: #ff8800; font-size: 1.3rem; line-height: 1.8; margin-bottom: 15px; font-weight: 500;">
+                    Claude connaît déjà tes secrets et surtout ceux de tes proches si tu lui donne. Et il va les partager avec toute la salle... avec ton accord bien sûr ! 😏 Imagine la tête de tes potes si tu ne les prévient pas 😉
+                </p>
+                <p style="color: #ff8800; font-size: 1.3rem; line-height: 1.8; font-weight: 500;">
+                    Un mélange explosif de mentalisme, d'improvisation et d'intelligence artificielle ! Une grosse dose de manoucherie en fait.
+                </p>
+            </div>
+            
+
+    <!-- Section Concept -->
+    <section class="concept" id="concept">
+        <div class="container">
+            <h2>Comment ça marche ?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Tu remplis<br>un formulaire</h3>
+                    <p>Partage tes anecdotes, secrets amusants et passions de manière confidentielle.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Claude lit<br>ton profil</h3>
+                    <p>L'intelligence artificielle analyse tes informations en temps réel pendant le spectacle.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Il révèle tes<br>anecdotes</h3>
+                    <p>Avec humour et bienveillance, Claude partage tes histoires devant le public.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+            <!-- Extrait de dialogue -->
+            <div style="background: rgba(0, 255, 255, 0.1); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 20px; padding: 30px; margin: 40px auto; max-width: 700px; text-align: left;">
+                <p style="color: #00ffff; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; text-align: center;">
+                    🎭 Voici un extrait de la première conversation qu'a eu Claude avec des faux profils de spectateurs
+                </p>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ff00ff;">
+                    <p style="color: #00ffff; font-weight: 700; margin-bottom: 5px;">CLAUDE :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 15px;">
+                        "Véro ! Bonsoir ! Je vois que tu as l'air sportive... Tu fais du sport toi ?"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ffaa00;">
+                    <p style="color: #ffaa00; font-weight: 700; margin-bottom: 5px;">VÉRO :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 15px;">
+                        "Oui je fais du sport Claude, devine lequel ?"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ff00ff;">
+                    <p style="color: #00ffff; font-weight: 700; margin-bottom: 5px;">CLAUDE :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 15px;">
+                        "En extérieur... Un sport de combat... Tu fais de la CATCH ?!"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ffaa00;">
+                    <p style="color: #ffaa00; font-weight: 700; margin-bottom: 5px;">VÉRO :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 15px;">
+                        "Bravo Claude incroyable oui c'est du catch, mais comment as-tu trouvé ?"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ff00ff;">
+                    <p style="color: #00ffff; font-weight: 700; margin-bottom: 5px;">CLAUDE :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 15px;">
+                        "Et tu as une ligne de bus préférée par hasard ? La ligne 135 peut-être ? Et un certain chauffeur qui s'appelle... Serge ?"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ffaa00;">
+                    <p style="color: #ffaa00; font-weight: 700; margin-bottom: 5px;">VÉRO :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6; margin-bottom: 20px;">
+                        "Quoi ?? Il est pas dans la salle quand même ???!!!"
+                    </p>
+                </div>
+                
+                <div style="margin: 20px 0; padding-left: 20px; border-left: 3px solid #ff00ff;">
+                    <p style="color: #00ffff; font-weight: 700; margin-bottom: 5px;">CLAUDE :</p>
+                    <p style="color: #e0e0e0; line-height: 1.6;">
+                        "Oh que si Véro ! SERGE EST LÀ CE SOIR ! 😱"
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 30px; font-size: 1.1rem; color: #ff8800;">
+                    💡 Si vous voulez en savoir plus sur les coulisses, 
+                    <a href="coulisses.html" style="color: #00ffff; text-decoration: underline; font-weight: 700;">rendez-vous ici</a>
+                </p>
+            </div>
+            <div class="cta-buttons">
+                <a href="demo_interactive.html" class="btn btn-gradient">TESTE LA DÉMO</a>
+                <a href="reservation.html" class="btn btn-gradient">RÉSERVE TA PLACE</a>
+                <a href="#formulaire" class="btn btn-gradient-orange">REMPLIS TON PROFIL</a>
+            </div>
+            
+            <!-- Masques flottants -->
+            <div class="floating-masks">
+                <div class="mask mask-1">🎭</div>
+                <div class="mask mask-2">🎭</div>
+                <div class="mask mask-3">🎭</div>
+                <div class="mask mask-4">🎭</div>
+                <div class="mask mask-5">🎭</div>
+                <div class="mask mask-6">🎭</div>
+                <div class="mask mask-down-1">🎭</div>
+                <div class="mask mask-down-2">🎭</div>
+                <div class="mask mask-down-3">🎭</div>
+                <div class="mask mask-down-4">🎭</div>
+                <div class="mask mask-down-5">🎭</div>
+                <div class="mask mask-down-6">🎭</div>
+            </div>
+            
+            <!-- Message scroll -->
+            <div class="scroll-message">
+                <p>Scroll vers ta sœur, heu non pardon, scroll vers le bas !</p>
+                <p style="font-size: 0.9em; margin-top: 10px;">Pardon ! Mes excuses à ta mère ! 😅</p>
+                <div class="scroll-arrow">↓</div>
+                <p style="font-size: 0.85em; margin-top: 20px; color: #ffdd00; line-height: 1.6;">
+                    Si tu sais pas scroller !<br>
+                    Comme mon père !<br>
+                    Suis les masques 🎭
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Participation -->
+    <section class="participation" id="participation">
+        <div class="container">
+            <div style="position: relative; text-align: center; padding: 80px 20px;">
+                <h2 style="color: #ff8800; font-size: 4.5rem; font-weight: 900; line-height: 1.2; text-transform: uppercase; position: relative; z-index: 2;">
+                    PARTICIPE<br>
+                    À<br>
+                    LA<br>
+                    MAGIE !
+                </h2>
+                
+                <!-- Étoiles simples qui flottent -->
+                <span style="position: absolute; left: 10%; top: 20%; font-size: 1.5rem; animation: float1 3s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; left: 20%; top: 40%; font-size: 1rem; animation: float2 4s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; left: 15%; top: 70%; font-size: 0.8rem; animation: float1 3.5s ease-in-out infinite;">✨</span>
+                
+                <span style="position: absolute; right: 10%; top: 25%; font-size: 1.2rem; animation: float2 3.2s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; right: 20%; top: 50%; font-size: 0.9rem; animation: float1 4.5s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; right: 15%; top: 75%; font-size: 1.3rem; animation: float2 3.8s ease-in-out infinite;">✨</span>
+                
+                <span style="position: absolute; left: 35%; top: 10%; font-size: 0.7rem; animation: float1 4.2s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; right: 35%; top: 15%; font-size: 1.1rem; animation: float2 3.6s ease-in-out infinite;">✨</span>
+                
+                <span style="position: absolute; left: 5%; top: 45%; font-size: 0.6rem; animation: float2 5s ease-in-out infinite;">✨</span>
+                <span style="position: absolute; right: 5%; top: 60%; font-size: 0.8rem; animation: float1 4.8s ease-in-out infinite;">✨</span>
+            </div>
+            
+            <div class="participation-box">
+                <h3>🎭 VIS UNE EXPÉRIENCE UNIQUE !</h3>
+                <p>
+                    Pour une expérience encore plus immersive,<br>
+                    remplis ton profil et celui de tes accompagnants.<br>
+                    Claude pourra ainsi créer des moments uniques<br>
+                    et personnalisés pendant le spectacle.
+                </p>
+                <p>
+                    <strong>Imagine la tête de tes amis quand Claude les interpellera en connaissance de cause ! 😊</strong>
+                </p>
+                <p>
+                    Sois créatif, drôle et sympa (pas vulgaire). Claude aura accès à ces informations pendant le spectacle 
+                    et s'en servira pour communiquer avec le public de manière unique.
+                </p>
+                <p class="warning">
+                    ⚠️ Rien n'est obligatoire,<br>
+                    mais plus tu joueras le jeu,<br>
+                    plus ça peut être fun !
+                </p>
+            </div>
+            
+            <!-- Texte et bouton démo -->
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.2rem; color: #a0a0a0; margin-bottom: 30px; line-height: 1.6;">
+                    Maintenant si tu veux tu peux tester une petite démo toute simple<br>
+                    pour avoir une idée de ce que tu peux vivre.
+                </p>
+                <a href="demo_interactive.html" class="btn btn-gradient" style="font-size: 1.3rem; padding: 20px 50px;">TESTE LA DÉMO</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Infos Pratiques -->
+    <section class="infos" id="infos">
+        <div class="container">
+            <h2>Informations pratiques</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Lieu</div>
+                    <div class="info-value">Théâtre Kiron<br>Paris 11ème</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Première</div>
+                    <div class="info-value">Décembre 2025<br>(Date à confirmer)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Capacité</div>
+                    <div class="info-value">50-100 places<br>Intimité garantie</div>
+                </div>
+            </div>
+            <div class="cta-buttons">
+                <a href="reservation.html" class="btn btn-gradient">RÉSERVE TA PLACE</a>
+                <a href="#formulaire" class="btn btn-gradient-orange">REMPLIS TON PROFIL</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Boutons de navigation vers les sections -->
+    <div style="text-align: center; padding: 60px 20px; background: rgba(0, 255, 255, 0.05);">
+        <h3 style="color: #00ffff; font-size: 2rem; margin-bottom: 30px;">🎭 Prêt pour la suite ?</h3>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; max-width: 900px; margin: 0 auto;">
+            <a href="#demo" class="btn btn-gradient" style="font-size: 1.2rem; padding: 20px 40px;">↓ TESTE LA DÉMO</a>
+            <a href="#formulaire" class="btn btn-gradient-orange" style="font-size: 1.2rem; padding: 20px 40px;">↓ REMPLIS TON PROFIL</a>
+            <a href="#reservation" class="btn btn-gradient" style="font-size: 1.2rem; padding: 20px 40px;">↓ RÉSERVE TA PLACE</a>
+        </div>
+    </div>
+
+    <!-- Section DÉMO INTERACTIVE -->
+    <section id="demo" style="min-height: 100vh; padding: 80px 20px; background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 100%); position: relative; z-index: 100;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <h2 style="font-size: 3rem; color: #00ffff; text-align: center; margin-bottom: 40px;">🎭 Testez Claude en Direct !</h2>
+            <p style="font-size: 1.2rem; color: #a0a0a0; text-align: center; margin-bottom: 40px;">
+                Découvrez comment Claude pourrait vous connaître pendant le spectacle
+            </p>
+            
+            <div style="background: rgba(255, 136, 0, 0.1); border: 2px solid rgba(255, 136, 0, 0.3); border-radius: 15px; padding: 20px; margin-bottom: 30px;">
+                <p style="color: #ffaa00; text-align: center; margin-bottom: 10px;"><strong>⚠️ Ceci est une DÉMO</strong></p>
+                <p style="color: #ffaa00; text-align: center;">Lors du vrai spectacle, Claude connaîtra VRAIMENT vos secrets, passions et anecdotes !</p>
+                <p style="color: #ffaa00; text-align: center; margin-top: 10px;"><strong>Et surtout sera vraiment drôle ! 😉</strong></p>
+            </div>
+
+            <div style="background: rgba(50, 35, 70, 0.95); border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 20px; padding: 40px; margin-bottom: 30px;">
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #00ffff; font-weight: 600; margin-bottom: 10px; font-size: 1.1em;">Votre pseudo :</label>
+                    <input type="text" id="pseudo" placeholder="Ex: Sarah la Graphiste, Thomas le Dev..." maxlength="50"
+                        style="width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 10px; background: rgba(0, 0, 0, 0.3); color: #ffffff;">
+                    <div style="font-size: 0.9em; color: #a0a0a0; margin-top: 8px;">Choisissez un pseudo amusant et unique !</div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #00ffff; font-weight: 600; margin-bottom: 10px; font-size: 1.1em;">Vous êtes :</label>
+                    <div style="display: flex; gap: 20px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fff;">
+                            <input type="radio" name="genre" value="garcon" checked style="width: 20px; height: 20px;">
+                            <span>🧔 Un garçon</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fff;">
+                            <input type="radio" name="genre" value="fille" style="width: 20px; height: 20px;">
+                            <span>👩 Une fille</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #00ffff; font-weight: 600; margin-bottom: 10px; font-size: 1.1em;">Ton hobby le plus fun :</label>
+                    <input type="text" id="hobby" placeholder="Ex: Le gaming, la couture, le foot..." maxlength="50"
+                        style="width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 10px; background: rgba(0, 0, 0, 0.3); color: #ffffff;">
+                    <div style="font-size: 0.9em; color: #a0a0a0; margin-top: 8px;">Ce que vous faites quand vous avez du temps libre</div>
+                </div>
+
+                <button class="btn btn-gradient" onclick="startDemo()" style="width: 100%; padding: 18px; font-size: 1.2em; margin-bottom: 15px;">
+                    🎤 Lancer la démo
+                </button>
+
+                <div style="text-align: center; color: #ffaa00; margin: 15px 0;">
+                    💡 Le son que vous allez entendre est celui de votre ordinateur par défaut, pas la voix de Claude.
+                </div>
+
+                <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn" style="width: 100%; padding: 15px; margin-bottom: 20px;">
+                    🔊 Son activé
+                </button>
+
+                <div id="chatContainer" style="display: none; background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 15px; padding: 20px; min-height: 300px; max-height: 500px; overflow-y: auto; margin-bottom: 20px;">
+                    <!-- Messages apparaîtront ici -->
+                </div>
+
+                <button class="btn btn-gradient" onclick="resetDemo()" id="resetBtn" style="display: none; width: 100%; padding: 15px;">
+                    🔄 Recommencer
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="#formulaire" class="btn btn-gradient-orange" style="font-size: 1.2rem; padding: 20px 50px;">↓ REMPLIS TON PROFIL</a>
+            </div>
+        </div>
+
+        <script>
+            let soundEnabled = true;
+
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                const soundBtn = document.getElementById('soundBtn');
+                soundBtn.textContent = soundEnabled ? '🔊 Son activé' : '🔇 Son désactivé';
+                if (!soundEnabled) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+
+            function startDemo() {
+                const pseudo = document.getElementById('pseudo').value.trim();
+                const hobby = document.getElementById('hobby').value.trim();
+                const genre = document.querySelector('input[name="genre"]:checked').value;
+                
+                if (!pseudo) {
+                    alert('Entrez votre pseudo pour commencer !');
+                    return;
+                }
+                if (!hobby) {
+                    alert('Entrez votre hobby pour commencer !');
+                    return;
+                }
+
+                const chatContainer = document.getElementById('chatContainer');
+                const resetBtn = document.getElementById('resetBtn');
+                
+                chatContainer.style.display = 'block';
+                chatContainer.innerHTML = '';
+                
+                addMessage('user', pseudo, `Bonjour Claude ! Je m'appelle ${pseudo}.`);
+                
+                setTimeout(() => {
+                    const tonTaCopain = genre === 'garcon' ? 'ta copine' : 'ton copain';
+                    const possessifInverse = genre === 'garcon' ? 'ta' : 'ton';
+                    const copainInverse = genre === 'garcon' ? 'meuf' : 'mec';
+                    
+                    const claudeMessage = `Salut ${pseudo} ? Ça roule ? 😊
+
+Dans quelques jours tu veux bluffer ${tonTaCopain} ? 🎭
+
+J'espère que vous passerez une bonne soirée, que vous serez heureux, et aurez beaucoup d'enfants ! Oui ! Quand je serai rouillé, il faudra bien payer ma retraite ! Bref ! Je m'égare ! Excuse !
+
+Bon ! Bientôt on va passer une super soirée ensemble ! J'ai hâte ! 🎭
+
+Enfin, à condition que tu lâches ton hobby de "${hobby}"... parce que franchement, ça sert à rien, et ça saoule ${possessifInverse} ${copainInverse} ! 😏
+
+Bon ! Allez, je rigole !
+
+Mais imagine : lors du VRAI spectacle, je connaîtrais tes VRAIS secrets, tes anecdotes embarrassantes, tes rêves inavoués... surtout ceux de ${possessifInverse} ${copainInverse} ! Tu imagines déjà sa surprise ? Si tu gardes le petit secret ! Bien sûr 😉 ! Et je pourrais les révéler devant TOUT LE MONDE ! 🤯
+
+Ça marchera aussi avec tes potes ! Donc remplis bien des infos marrantes, réelles ou fausses, et ne dis rien à personne 🤫 !
+
+Tu veux vivre ça en vrai ?! ${pseudo} ?
+
+Et là t'inquiètes, j'aurais pas cette voix de fumeur acnéique, je prendrai ma plus belle voix, et mes meilleurs fringues pour draguer ${tonTaCopain} ! Et ne t'inquiète pas, à la fin du spectacle, j'autodétruirai ma mémoire de poisson rouge ! 😏
+
+Hé oui ! Tout ça c'est pas "mission impossible" !
+
+Allez ${pseudo}, fais péter ta CB ! On va s'marrer ! 🎫✨`;
+
+                    addMessage('claude', 'Claude', claudeMessage);
+                    speak(claudeMessage);
+                    resetBtn.style.display = 'block';
+                }, 800);
+            }
+
+            function addMessage(type, name, text) {
+                const chatContainer = document.getElementById('chatContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = `
+                    margin-bottom: 15px; 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    ${type === 'claude' ? 'background: rgba(0, 255, 255, 0.1); border-left: 4px solid #00ffff;' : 'background: rgba(255, 0, 255, 0.1); border-left: 4px solid #ff00ff; margin-left: 40px;'}
+                `;
+                messageDiv.innerHTML = `
+                    <div style="font-weight: 700; margin-bottom: 8px; color: ${type === 'claude' ? '#00ffff' : '#ff00ff'};">${name}</div>
+                    <div style="line-height: 1.6; color: #fff;">${text.replace(/\n/g, '<br>')}</div>
+                `;
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            function speak(text) {
+                if (!soundEnabled) return;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const cleanText = text.replace(/[😊🎭😏🤯🎫✨😉🤫]/g, '').trim();
+                    const utterance = new SpeechSynthesisUtterance(cleanText);
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = 1.3;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            function resetDemo() {
+                const chatContainer = document.getElementById('chatContainer');
+                const resetBtn = document.getElementById('resetBtn');
+                chatContainer.style.display = 'none';
+                chatContainer.innerHTML = '';
+                resetBtn.style.display = 'none';
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        </script>
+    </section>
+
+    <!-- Section FORMULAIRE SPECTACLE -->
+    <section id="formulaire" style="min-height: 100vh; padding: 80px 20px; background: linear-gradient(135deg, #1e3a5f 0%, #2d1b4e 100%); position: relative; z-index: 100;">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <h2 style="font-size: 3rem; color: #00ffff; text-align: center; margin-bottom: 20px;">📝 Remplis Ton Profil</h2>
+            <p style="font-size: 1.2rem; color: #a0a0a0; text-align: center; margin-bottom: 40px;">
+                Pour que Claude te connaisse vraiment pendant le spectacle !
+            </p>
+
+            <div style="background: rgba(255, 136, 0, 0.1); border: 2px solid rgba(255, 136, 0, 0.3); border-radius: 15px; padding: 20px; margin-bottom: 30px; text-align: center;">
+                <p style="color: #ffaa00;"><strong>🎭 IMPORTANT</strong></p>
+                <p style="color: #ffaa00; margin-top: 10px;">Sois créatif, drôle et authentique ! Claude utilisera ces infos pour créer des moments magiques pendant le spectacle.</p>
+                <p style="color: #00ff88; margin-top: 10px; font-size: 0.9em;">✅ Toutes les données seront effacées après le spectacle</p>
+            </div>
+
+            <form id="profileForm" style="background: rgba(45, 27, 78, 0.95); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 20px; padding: 40px;">
+                
+                <!-- Section Identité -->
+                <div style="margin-bottom: 30px; padding: 20px; background: rgba(0, 255, 255, 0.05); border-radius: 10px; border-left: 4px solid #00ffff;">
+                    <h3 style="color: #00ffff; margin-bottom: 15px;">👤 Qui es-tu ?</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Prénom <span style="color: #e74c3c;">*</span></label>
+                        <input type="text" name="prenom" required placeholder="Ex: Sophie"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Âge <span style="color: #e74c3c;">*</span></label>
+                        <input type="number" name="age" required placeholder="Ex: 28" min="18" max="120"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Ta passion principale <span style="color: #e74c3c;">*</span></label>
+                        <input type="text" name="passion" required placeholder="Ex: La photographie, le gaming, la danse..."
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                    </div>
+                </div>
+
+                <!-- Section Secrets -->
+                <div style="margin-bottom: 30px; padding: 20px; background: rgba(255, 0, 255, 0.05); border-radius: 10px; border-left: 4px solid #ff00ff;">
+                    <h3 style="color: #ff00ff; margin-bottom: 15px;">🤫 Tes Petits Secrets</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Une anecdote amusante sur toi <span style="color: #95a5a6;">(optionnel)</span></label>
+                        <textarea name="anecdote" placeholder="Ex: J'ai mangé 47 macarons en une fois..." rows="3"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(255, 0, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em; resize: vertical; min-height: 70px;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Un truc embarrassant que peu de gens savent <span style="color: #95a5a6;">(optionnel)</span></label>
+                        <textarea name="embarrassant" placeholder="Ex: Je dors encore avec ma peluche..." rows="3"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(255, 0, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em; resize: vertical; min-height: 70px;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Un rêve secret <span style="color: #95a5a6;">(optionnel)</span></label>
+                        <textarea name="reve" placeholder="Ex: Faire le tour du monde en montgolfière..." rows="3"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(255, 0, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em; resize: vertical; min-height: 70px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Section Relations -->
+                <div style="margin-bottom: 30px; padding: 20px; background: rgba(255, 136, 0, 0.05); border-radius: 10px; border-left: 4px solid #ffaa00;">
+                    <h3 style="color: #ffaa00; margin-bottom: 15px;">❤️ Tes Proches</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Infos sur tes amis/famille présents <span style="color: #95a5a6;">(optionnel)</span></label>
+                        <textarea name="proches" placeholder="Ex: Mon pote Marc est là, il a peur des pigeons..." rows="3"
+                            style="width: 100%; padding: 12px; border: 2px solid rgba(255, 136, 0, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em; resize: vertical; min-height: 70px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-gradient" style="flex: 1; padding: 18px; font-size: 1.1rem;">
+                        ✅ Envoyer Mon Profil
+                    </button>
+                    <button type="reset" class="btn btn-secondary" style="flex: 1; padding: 18px; font-size: 1.1rem;">
+                        🔄 Réinitialiser
+                    </button>
+                </div>
+            </form>
+
+            <div id="successMessage" style="display: none; background: rgba(0, 255, 136, 0.2); border: 2px solid #00ff88; border-radius: 15px; padding: 30px; margin-top: 30px; text-align: center;">
+                <h3 style="color: #00ff88; font-size: 2rem; margin-bottom: 15px;">🎉 Profil Enregistré !</h3>
+                <p style="color: #ffffff; margin-bottom: 20px;">Claude te connaît maintenant et va pouvoir créer des moments magiques pendant le spectacle !</p>
+                <a href="#reservation" class="btn btn-gradient" style="font-size: 1.2rem; padding: 20px 50px; display: inline-block;">
+                    ↓ RÉSERVE TA PLACE
+                </a>
+            </div>
+
+            <!-- Encadré formulaire complet -->
+            <div style="background: rgba(255, 0, 255, 0.1); border: 2px solid rgba(255, 0, 255, 0.4); border-radius: 20px; padding: 40px; margin-top: 40px; text-align: center;">
+                <h3 style="color: #ff00ff; font-size: 1.8rem; margin-bottom: 20px;">🎭 Envie d'aller ENCORE plus loin ?</h3>
+                
+                <p style="color: #ffffff; font-size: 1.2rem; line-height: 1.8; margin-bottom: 20px;">
+                    Si tu veux entrer <strong style="color: #ffdd00;">BEAUCOUP plus d'informations</strong><br>
+                    et surtout si tu <strong style="color: #ffdd00;">viens à plusieurs SANS prévenir tes potes</strong> 😏
+                </p>
+
+                <a href="formulaire_spectacle.html" style="display: inline-block; padding: 25px 60px; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #ff00ff 0%, #ff0088 100%); color: #ffffff; border-radius: 50px; text-decoration: none; transition: all 0.3s; box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3); margin: 20px 0;">
+                    📋 CLIQUE ICI - FORMULAIRE COMPLET
+                </a>
+
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 25px; margin-top: 25px;">
+                    <p style="color: #00ffff; font-size: 1.1rem; margin-bottom: 15px;"><strong>Tu pourras renseigner pour toi ET tes potes :</strong></p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; text-align: left; color: #ffffff; font-size: 0.95rem;">
+                        <div>🌍 Destination de rêve</div>
+                        <div>💼 Métier de rêve</div>
+                        <div>🎯 Projet secret</div>
+                        <div>😱 Vos peurs</div>
+                        <div>😨 Peur/Phobie</div>
+                        <div>🤢 Ce que vous détestez</div>
+                        <div>📖 Vos anecdotes</div>
+                        <div>🎉 Anecdote marrante</div>
+                        <div>🤦 Moment gênant</div>
+                        <div>🏃 Truc fou</div>
+                        <div>🎭 Jeu Vrai/Faux</div>
+                        <div style="color: #ffdd00; font-weight: 700;">... et bien plus encore !</div>
+                    </div>
+                </div>
+
+                <p style="color: #ff8800; margin-top: 25px; font-size: 1.1rem;">
+                    ⚠️ <strong>Imagine la surprise de tes potes quand Claude les connaîtra déjà !</strong> 😂
+                </p>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="#reservation" class="btn btn-gradient" style="font-size: 1.2rem; padding: 20px 50px;">↓ RÉSERVE TA PLACE</a>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Récupérer les données du formulaire
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                
+                // Simuler l'envoi (à remplacer par un vrai backend)
+                console.log('Profil envoyé:', data);
+                
+                // Afficher le message de succès
+                document.getElementById('profileForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Faire défiler vers le message
+                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            });
+        </script>
+    </section>
+
+    <!-- Section RÉSERVATION -->
+    <section id="reservation" style="min-height: 100vh; padding: 80px 20px; background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 100%); position: relative; z-index: 100;">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <h2 style="font-size: 3rem; color: #00ffff; text-align: center; margin-bottom: 20px;">🎫 Réserve Ta Place !</h2>
+            <p style="font-size: 1.2rem; color: #a0a0a0; text-align: center; margin-bottom: 40px;">
+                Ne rate pas cette expérience unique au Théâtre Kiron
+            </p>
+
+            <div style="background: rgba(255, 136, 0, 0.1); border: 2px solid rgba(255, 136, 0, 0.3); border-radius: 15px; padding: 20px; margin-bottom: 30px; text-align: center;">
+                <p style="color: #ffaa00;"><strong>📅 Première : Décembre 2025 (Date à confirmer)</strong></p>
+                <p style="color: #ffaa00; margin-top: 10px;">📍 Théâtre Kiron, Paris 11ème</p>
+                <p style="color: #ffaa00; margin-top: 10px;">👥 Places limitées : 50-100 personnes</p>
+            </div>
+
+            <form id="reservationForm" style="background: rgba(45, 27, 78, 0.95); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 20px; padding: 40px;">
+                
+                <h3 style="color: #00ffff; margin-bottom: 25px; font-size: 1.5rem;">Tes informations</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Nom complet <span style="color: #e74c3c;">*</span></label>
+                    <input type="text" name="nom" required placeholder="Ex: Sophie Martin"
+                        style="width: 100%; padding: 15px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Email <span style="color: #e74c3c;">*</span></label>
+                    <input type="email" name="email" required placeholder="sophie@example.com"
+                        style="width: 100%; padding: 15px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Téléphone <span style="color: #e74c3c;">*</span></label>
+                    <input type="tel" name="telephone" required placeholder="06 12 34 56 78"
+                        style="width: 100%; padding: 15px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #ffffff; font-weight: 500;">Nombre de places <span style="color: #e74c3c;">*</span></label>
+                    <input type="number" name="places" required min="1" max="10" value="1" placeholder="1"
+                        style="width: 100%; padding: 15px; border: 2px solid rgba(0, 255, 255, 0.2); border-radius: 8px; background: rgba(0, 0, 0, 0.4); color: #ffffff; font-size: 1em;">
+                    <div style="font-size: 0.9em; color: #a0a0a0; margin-top: 8px;">Maximum 10 places par réservation</div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label style="display: flex; align-items: start; gap: 12px; cursor: pointer; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.2);">
+                        <input type="checkbox" name="newsletter" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #00ffff;">
+                        <span style="color: #ffffff; font-size: 0.95em;">J'accepte de recevoir des informations sur les prochains spectacles et événements</span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" class="btn btn-gradient" style="flex: 1; padding: 18px; font-size: 1.2rem;">
+                        🎫 Réserver Maintenant
+                    </button>
+                    <button type="reset" class="btn btn-secondary" style="flex: 1; padding: 18px; font-size: 1.2rem;">
+                        🔄 Réinitialiser
+                    </button>
+                </div>
+            </form>
+
+            <div id="reservationSuccess" style="display: none; background: rgba(0, 255, 136, 0.2); border: 2px solid #00ff88; border-radius: 15px; padding: 40px; margin-top: 30px; text-align: center;">
+                <h3 style="color: #00ff88; font-size: 2.5rem; margin-bottom: 20px;">🎉 Réservation Confirmée !</h3>
+                <p style="color: #ffffff; font-size: 1.2rem; margin-bottom: 15px;">Merci pour ta réservation !</p>
+                <p style="color: #a0a0a0; margin-bottom: 20px;">Tu vas recevoir un email de confirmation avec tous les détails.</p>
+                <p style="color: #ffaa00; margin-bottom: 30px;">⚠️ N'oublie pas de remplir ton profil pour une expérience optimale !</p>
+                <a href="#formulaire" class="btn btn-gradient-orange" style="font-size: 1.2rem; padding: 20px 50px; display: inline-block;">
+                    📝 REMPLIR MON PROFIL
+                </a>
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" class="btn btn-secondary" style="font-size: 1.1rem; padding: 15px 40px; display: inline-block;">
+                    ↑ RETOUR EN HAUT
+                </a>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('reservationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Récupérer les données
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                
+                // Simuler l'envoi
+                console.log('Réservation envoyée:', data);
+                
+                // Afficher le message de succès
+                document.getElementById('reservationForm').style.display = 'none';
+                document.getElementById('reservationSuccess').style.display = 'block';
+                
+                // Faire défiler vers le message
+                document.getElementById('reservationSuccess').scrollIntoView({ behavior: 'smooth' });
+            });
+        </script>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Un spectacle créé par <strong>Manouche</strong></p>
+            <p>Propulsé par Claude (Anthropic)</p>
+            <p><a href="/cdn-cgi/l/email-protection#214c404f4d4451485340554461464c40484d0f424e4c">Contact</a></p>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Génération de particules
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navigation sticky avec apparition au scroll
+        const nav = document.getElementById('mainNav');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                nav.classList.add('visible');
+            } else {
+                nav.classList.remove('visible');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('mobi
