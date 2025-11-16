@@ -643,7 +643,7 @@
             </button>
 
             <button type="button" class="btn-send" id="sendBtn" onclick="sendProfiles()" style="display:none;">
-                📧 Envoyer les profils à Manu
+                📧 Envoyer les profils à Claude
             </button>
 
             <div class="email-info" id="emailInfo" style="display:none;">
@@ -651,10 +651,6 @@
                 Le fichier JSON va se télécharger. Envoyez-le par email à :<br>
                 <strong style="color: #667eea; font-size: 1.1em; margin-top: 5px; display: inline-block;">claudeshow2025@gmail.com</strong>
             </div>
-
-            <button type="button" class="btn-download" id="downloadBtn" onclick="downloadJSON()">
-                📥 Télécharger JSON (backup)
-            </button>
 
             <button type="button" class="btn-reset" onclick="resetAll()">
                 🗑️ Tout réinitialiser et recommencer à zéro
@@ -1094,16 +1090,21 @@
                 return;
             }
             
-            // Télécharger le JSON
-            downloadJSON();
+            // Créer le JSON formaté
+            const jsonData = JSON.stringify(profiles, null, 2);
+            
+            // Créer le corps de l'email avec le JSON dedans
+            let emailBody = 'genere\n\n';
+            emailBody += '=== PROFILS SPECTACLE (JSON) ===\n\n';
+            emailBody += jsonData;
             
             // Afficher les instructions email
             document.getElementById('emailInfo').style.display = 'block';
             
-            // Ouvrir le client email
-            const subject = encodeURIComponent('Profils spectacle Claude');
-            const body = encodeURIComponent(`Bonjour Manu,\n\nVoici les ${profiles.length} profil(s) pour le spectacle.\n\nLe fichier JSON est en pièce jointe.\n\nÀ bientôt ! 🎭`);
-            window.location.href = `mailto:manuelpouilloux@gmail.com?subject=${subject}&body=${body}`;
+            // Ouvrir le client email avec le JSON dans le corps
+            const subject = encodeURIComponent('genere - Profils spectacle');
+            const body = encodeURIComponent(emailBody);
+            window.location.href = 'mailto:claudeshow2025@gmail.com?subject=' + subject + '&body=' + body;
         }
 
         function downloadJSON() {
